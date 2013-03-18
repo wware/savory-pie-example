@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block head_title %}{% endblock head_title %}</title>
+        <meta name="description" content="{% block head_description %}{% endblock head_description %}">
+        <meta name="author" content="">
+    </head>
+
+    <body>
+        {% block body %}
+        Here are some objects.
+        {% if zones %}
+            <ul>
+            {% for z in zones %}
+                <li><b>{{ z.name }}</b>, a {{ z.type }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% if contents %}
+            <ul>
+            {% for c in contents %}
+                <li><b>{{ c.title}}</b>, a {{ c.type }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% if zonecontents %}
+            <ul>
+            {% for z in zonecontents %}
+                <li><b>{{ z.zone }}:{{ z.content }}</b>, a {{ z.type }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endblock body %}
+    </body>
+</html>
