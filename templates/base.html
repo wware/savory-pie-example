@@ -24,10 +24,17 @@
             {% endfor %}
             </ul>
         {% endif %}
+        {% if segments %}
+            <ul>
+            {% for s in segments %}
+                <li><b>{{ s.name }}</b>, a {{ s.type }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
         {% if zonecontents %}
             <ul>
             {% for z in zonecontents %}
-                <li><b>{{ z.zone }}:{{ z.content }}</b>, a {{ z.type }}</li>
+                <li><b>{{ z.zone }}:{{ z.content }}:{{ z.segment }}</b>, a {{ z.type }}</li>
             {% endfor %}
             </ul>
         {% endif %}
