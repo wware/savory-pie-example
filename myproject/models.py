@@ -10,6 +10,44 @@ from savory_pie.django import fields, resources, filters
 logger = logging.getLogger(__name__)
 
 
+####### Here's how inlines work in the admin page ##########
+
+
+class Person(models.Model):
+    name = models.CharField(max_length=128)
+    def __str__(self):
+        return "<%s>" % self.name
+
+class Group(models.Model):
+    name = models.CharField(max_length=128)
+    members = models.ManyToManyField(Person, through='Membership')
+    def __str__(self):
+        return "<%s>" % self.name
+
+class Membership(models.Model):
+    person = models.ForeignKey(Person)
+    group = models.ForeignKey(Group)
+    date_joined = models.DateField()
+    invite_reason = models.CharField(max_length=64)
+
+class MembershipInline(admin.TabularInline):
+    model = Membership
+    extra = 1
+
+class PersonAdmin(admin.ModelAdmin):
+    inlines = (MembershipInline,)
+
+class GroupAdmin(admin.ModelAdmin):
+    inlines = (MembershipInline,)
+
+admin.site.register(Person, PersonAdmin)
+admin.site.register(Group, GroupAdmin)
+admin.site.register(Membership)
+
+
+#######
+
+
 class Zone(models.Model):
     """
     A Zone is a content place holder.
