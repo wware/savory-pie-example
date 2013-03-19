@@ -9,10 +9,11 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from savory_pie.resources import APIResource
 from savory_pie.django import fields, resources, filters
 
 from myproject.models import Zone, Content, Segment, ZoneContent
-from myproject.api.root import root_resource
+
 
 class ZoneResource(resources.ModelResource):
     parent_resource_path = 'zone'
@@ -78,6 +79,7 @@ class ZoneContentQuerySetResource(resources.QuerySetResource):
         filters.ParameterizedFilter('zone', 'zone__id'),
     ]
 
+root_resource = APIResource()
 root_resource.register_class(ZoneQuerySetResource)
 root_resource.register_class(ContentQuerySetResource)
 root_resource.register_class(ZoneContentQuerySetResource)

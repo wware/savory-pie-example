@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from myproject.models import Zone, Content, ZoneContent
-from myproject.api.root import root_resource as api_root_resource
+from myproject.api.models import root_resource as api_root_resource
 
 import os, sys
 sys.path.append(os.path.realpath("../savory-pie"))
