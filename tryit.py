@@ -15,46 +15,112 @@ import subprocess
 
 opener = urllib2.build_opener(urllib2.HTTPHandler)
 
-subprocess.Popen('./helper.sh')
-time.sleep(2.5)
+USE_SUBPROCESS = (len(sys.argv) == 1)
 
-def get(url):
-    request = urllib2.Request(url)
+if USE_SUBPROCESS:
+    subprocess.Popen('./helper.sh')
+    time.sleep(2.5)
+
+def get(uri):
+    request = urllib2.Request(uri)
     request.add_header('Content-Type', 'application/json')
     request.get_method = lambda: 'GET'
     data = json.load(opener.open(request))
-    pprint.pprint(data)
     return data
 
-def put(url, data):
-    request = urllib2.Request(url, data=json.dumps(data))
+def put(uri, data):
+    request = urllib2.Request(uri, data=json.dumps(data))
     request.add_header('Content-Type', 'application/json')
     request.get_method = lambda: 'PUT'
     opener.open(request)
 
-def delete(url, data):
-    request = urllib2.Request(url)
+def post(uri, data):
+    request = urllib2.Request(uri, data=json.dumps(data))
+    request.add_header('Content-Type', 'application/json')
+    request.get_method = lambda: 'POST'
+    opener.open(request)
+
+def delete(uri):
+    request = urllib2.Request(uri)
     request.add_header('Content-Type', 'application/json')
     request.get_method = lambda: 'DELETE'
     opener.open(request)
 
+REDIRECT_JSON = False
+if REDIRECT_JSON:
+    os.system('rm -f /tmp/junk.txt')
+    outf = open('/tmp/junk.txt', 'w')
+
+def show_all():
+    data = {
+        'content': get('http://localhost:8000/api/content'),
+        'zone': get('http://localhost:8000/api/zone'),
+        'zonecontent': get('http://localhost:8000/api/zonecontent'),
+    }
+    if REDIRECT_JSON:
+        pprint.pprint(data, stream=outf)
+        outf.write('\n' + (50 * '-') + '\n\n')
+    else:
+        pprint.pprint(data)
+    return data
+
+
 try:
-    data = get('http://localhost:8000/api/content')
-    assert data['meta']['count'] == 2
+    # Update then delete
+    uri = 'http://localhost:8000/api/content/1'
+    data = {
+        'resourceUri': uri,
+        'title': 'Harry Potter and the Endless Sequels',
+        'zones': [{'name': 'abcd',
+                   'resourceUri': 'http://localhost:8000/api/zone/1'}]
+    }
 
-    data = data['objects'][0]
-    url = data['resourceUri']
-    data['title'] = 'Harry Potter and the Endless Sequels'
-    pprint.pprint(data)
+    x = show_all()
+    assert x['content']['meta']['count'] == 2
+    assert x['zone']['meta']['count'] == 2
+    assert x['zonecontent']['meta']['count'] == 2
 
-    put(url, data)
-    delete(url, data)
+    put(uri, data)
+    x = show_all()
+    assert x['content']['meta']['count'] == 2
+    assert x['zone']['meta']['count'] == 2
+    assert x['zonecontent']['meta']['count'] == 3
+
+    delete(uri)
+    x = show_all()
+    assert x['content']['meta']['count'] == 1
+    assert x['zone']['meta']['count'] == 2
+    assert x['zonecontent']['meta']['count'] == 1
+
+    # Create a new one then delete
+    uri = 'http://localhost:8000/api/content'
+    data = {
+        'resourceUri': uri,
+        'title': 'Another Dumb Title',
+        'zones': [{'name': 'ijkl',
+                   'resourceUri': 'http://localhost:8000/api/zone/1'}]
+    }
+
+    post(uri, data)
+    x = show_all()
+    assert x['content']['meta']['count'] == 2
+    assert x['zone']['meta']['count'] == 2
+    assert x['zonecontent']['meta']['count'] == 2
+
+    delete('http://localhost:8000/api/content/3')
+    x = show_all()
+    assert x['content']['meta']['count'] == 1
+    assert x['zone']['meta']['count'] == 2
+    assert x['zonecontent']['meta']['count'] == 1
 
 finally:
-    for pid in os.popen('lsof -i:8000 | grep LISTEN | cut -c 8-12').read().strip().split('\n') + \
-               os.popen('ps ax | grep helper.sh | cut -c 1-5').read().strip().split('\n'):
-        if pid:
-            try:
-                os.kill(int(pid), 9)
-            except OSError:
-                pass
+    if REDIRECT_JSON:
+        outf.close()
+    if USE_SUBPROCESS:
+        for pid in os.popen('lsof -i:8000 | grep LISTEN | cut -c 8-12').read().strip().split('\n') + \
+                   os.popen('ps ax | grep helper.sh | cut -c 1-5').read().strip().split('\n'):
+            if pid:
+                try:
+                    os.kill(int(pid), 9)
+                except OSError:
+                    pass
