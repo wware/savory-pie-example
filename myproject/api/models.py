@@ -75,7 +75,7 @@ class ZoneContentQuerySetResource(resources.QuerySetResource):
     resource_path = 'zonecontent'
     resource_class = ZoneContentResource
     filters = [
-        filters.StandardFilter('zone_1', {'zone__id': 1}),
+        filters.StandardFilter('zoneOne', {'zone__id': 1}),
         filters.ParameterizedFilter('zone', 'zone__id'),
     ]
 

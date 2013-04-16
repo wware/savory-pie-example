@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.unittest import skip
 from django.utils.unittest.case import skipIf
+from django.core.management import call_command
 
 from myproject import models
 
@@ -14,34 +15,13 @@ DEBUG = True
 class DumbTest(TestCase):
 
     def setUp(self):
-        z1 = models.Zone()
-        z1.name = "abcd"
-        z1.save()
-        z2 = models.Zone()
-        z2.name = "efgh"
-        z2.save()
-        c1 = models.Content()
-        c1.title = "A Tree Grows in Brooklyn"
-        c1.save()
-        c2 = models.Content()
-        c2.title = "The Sun Also Rises"
-        c2.save()
-        s1 = models.Segment()
-        s1.name = "stuv"
-        s1.save()
-        s2 = models.Segment()
-        s2.name = "wxyz"
-        s2.save()
-        z = models.ZoneContent()
-        z.zone = z1
-        z.content = c1
-        z.segment = s1
-        z.save()
-        z = models.ZoneContent()
-        z.zone = z2
-        z.content = c2
-        z.segment = s2
-        z.save()
+        call_command('add_test_data')
+
+    def tearDown(self):
+        models.Zone.objects.all().delete()
+        models.Content.objects.all().delete()
+        models.Segment.objects.all().delete()
+        models.ZoneContent.objects.all().delete()
 
     def fetch(self, url):
         resp = self.client.get(url)
@@ -68,7 +48,8 @@ class DumbTest(TestCase):
         self.assertEqual('wxyz', zc['segment']['name'])
 
     def test_standard_filter(self):
-        content = self.fetch('/api/zonecontent?zone_1=')
+        content = self.fetch('/api/zonecontent?zoneOne=')
+        # import sys, pprint; print >> sys.stderr; pprint.pprint(content, stream=sys.stderr)
         meta = content['meta']
         self.assertEqual(1, meta['count'])
         zc = content['objects'][0]
