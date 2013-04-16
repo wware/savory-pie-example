@@ -18,7 +18,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': home + '/sqlite3.cruft',
+        'NAME': PROJECT_ROOT + '/sqlite3.cruft',
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',

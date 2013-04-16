@@ -55,11 +55,10 @@ class Zone(models.Model):
     """
     name = models.CharField(_('Name'), max_length=100)
 
-    def to_json(self):
-        return {"type": self.__class__.__name__, "name": self.name}
-
     def __str__(self):
         return "<Zone: %s>" % self.name
+
+IS_THROUGH = True
 
 
 class Content(models.Model):
@@ -68,10 +67,10 @@ class Content(models.Model):
 
     """
     title = models.CharField(_(u'Title'), max_length=255, blank=False)
-    zones = models.ManyToManyField(Zone, through='ZoneContent')
-
-    def to_json(self):
-        return {"type": self.__class__.__name__, "title": self.title}
+    if IS_THROUGH:
+        zones = models.ManyToManyField(Zone, through='ZoneContent')
+    else:
+        zones = models.ManyToManyField(Zone)
 
     def __str__(self):
         return "<Content: %s>" % self.title
@@ -84,9 +83,6 @@ class Segment(models.Model):
     """
     name = models.CharField(_('Name'), max_length=100)
 
-    def to_json(self):
-        return {"type": self.__class__.__name__, "name": self.name}
-
     def __str__(self):
         return "<Segment: %s>" % self.name
 
@@ -98,10 +94,7 @@ class ZoneContent(models.Model):
     """
     zone = models.ForeignKey(Zone)
     content = models.ForeignKey(Content)
-    segment = models.ForeignKey(Segment)
-
-    def to_json(self):
-        return {"type": self.__class__.__name__, "zone": self.zone, "content": self.content, "segment": self.segment}
+    segment = models.ForeignKey(Segment, blank=True, null=True)
 
     def __str__(self):
         return "<ZoneContent: %s ; %s ; %s>" % (repr(self.zone), repr(self.content), repr(self.segment))

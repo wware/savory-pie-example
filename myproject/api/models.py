@@ -30,6 +30,7 @@ class ContentResource(resources.ModelResource):
 
     fields = [
         fields.AttributeField('title', type=str),
+        fields.RelatedManagerField('zones', ZoneResource),
     ]
 
 
