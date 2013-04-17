@@ -19,7 +19,7 @@ USE_SUBPROCESS = (len(sys.argv) == 1)
 
 if USE_SUBPROCESS:
     subprocess.Popen('./helper.sh')
-    time.sleep(2.5)
+    time.sleep(5)
 
 def get(uri):
     request = urllib2.Request(uri)
