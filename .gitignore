@@ -1,4 +1,8 @@
 *.py[cod]
+sqlite3.*
+
+# virtualenv
+venv/
 
 # C extensions
 *.so
